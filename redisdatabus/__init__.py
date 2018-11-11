@@ -4,4 +4,3 @@ CARPI REDIS DATA BUS
 Licensed under MIT
 """
 
-from .utils import *
