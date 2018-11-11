@@ -21,7 +21,7 @@ setup(name='carpi-redisdatabus',
       license='MIT',
       packages=['redisdatabus'],
       install_requirements=[
-
+            'redis'
       ],
       zip_safe=False,
       include_package_data=True)
