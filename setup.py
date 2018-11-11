@@ -23,4 +23,5 @@ setup(name='carpi-redisdatabus',
       install_requirements=[
 
       ],
-      zip_safe=False)
+      zip_safe=False,
+      include_package_data=True)
