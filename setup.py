@@ -25,6 +25,7 @@ setup(name='carpi-redisdatabus',
       license='MIT',
       packages=['redisdatabus'],
       install_requires=[
+          'carpi-commons',
           'redis',
           'tzlocal',
           'pytz',

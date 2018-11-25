@@ -3,12 +3,14 @@ CARPI REDIS DATA BUS
 (C) 2018, Raphael "rGunti" Guntersweiler
 Licensed under MIT
 """
-from .logging import log, err_log
-from redis.client import PubSub
-from typing import Any
-from redis import StrictRedis
+from logging import Logger
 from threading import Thread
 from time import sleep, time
+from typing import Any
+
+from carpicommons.log import logger
+from redis import StrictRedis
+from redis.client import PubSub
 
 
 class BusWriter(object):
@@ -29,15 +31,17 @@ class BusWriter(object):
         :param db: Redis database
         :param password: Redis password
         """
+        self._log: Logger = logger(self.__class__.__name__)
+        log = self._log
         if redis:
             self._r = redis
-            log("Initialized a new Bus Writer from a given Redis instance")
+            log.info("Initialized a new Bus Writer from a given Redis instance")
         else:
             self._r = StrictRedis(host=host,
                                   port=port,
                                   db=db,
                                   password=password)
-            log("Initialized a new Bus Writer on redis://{}:{}/{}".format(host, port, db))
+            log.info("Initialized a new Bus Writer on redis://{}:{}/{}".format(host, port, db))
 
     def publish(self, channel: str, value: Any):
         """
@@ -45,7 +49,7 @@ class BusWriter(object):
         :param channel: Defines the name of the value
         :param value: Defines the value itself
         """
-        self._r.publish(channel, value)
+        self._r.publish(channel, str(value))
 
 
 class BusListener(Thread):
@@ -68,6 +72,9 @@ class BusListener(Thread):
         """
         Thread.__init__(self)
 
+        self._log: Logger = logger(self.__class__.__name__)
+        log = self._log
+
         if redis:
             self._r = redis
         else:
@@ -75,7 +82,7 @@ class BusListener(Thread):
                                   port=port,
                                   db=db,
                                   password=password)
-            log("Initialized a new Bus Writer on redis://{}:{}/{}".format(host, port, db))
+            log.info("Initialized a new Bus Writer on redis://{}:{}/{}".format(host, port, db))
 
         self.setName(name
                      if name
@@ -86,11 +93,8 @@ class BusListener(Thread):
         self._callbacks = {}
         self._global_callbacks = []
 
-        self._log("A new {} has been initialized".format(self.__class__.__name__))
+        log.info("A new {} has been initialized".format(self.__class__.__name__))
         self._running = False
-
-    def _log(self, msg):
-        log('{}: {}'.format(self.getName(), msg))
 
     def _init_listener(self) -> PubSub:
         sub = self._r.pubsub()
@@ -110,7 +114,7 @@ class BusListener(Thread):
         self._callbacks[channel].append(callback)
 
     def run(self) -> None:
-        self._log("Starting up...")
+        self._log.info("Starting up...")
         self._running = True
 
         sub = self._init_listener()
@@ -120,7 +124,7 @@ class BusListener(Thread):
             if msg and msg['type'] == 'message':
                 channel, data = self._process_entry(msg)
 
-                self._log('{}: {}'.format(channel, data))
+                self._log.info('{}: {}'.format(channel, data))
                 self._current_data[channel] = data
                 for glc in self._global_callbacks:
                     glc(channel, data)
