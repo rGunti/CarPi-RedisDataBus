@@ -10,7 +10,7 @@ with open('README.md', 'r') as f:
     long_description = f.read()
 
 setup(name='carpi-redisdatabus',
-      version='0.1.3',
+      version='0.2.0',
       description='Redis Data Bus (inspired by CAN-BUS, developed for CarPi)',
       long_description=long_description,
       url='https://github.com/rGunti/CarPi-RedisDataBus',
@@ -25,6 +25,7 @@ setup(name='carpi-redisdatabus',
       license='MIT',
       packages=['redisdatabus'],
       install_requires=[
+          'carpi-commons',
           'redis',
           'tzlocal',
           'pytz',
